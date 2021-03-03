@@ -90,6 +90,24 @@ func WithConsoleEncoder() Option {
 	}
 }
 
+func WithMaxSize(maxSize int) Option {
+	return func(opt *option) {
+		opt.maxSize = maxSize
+	}
+}
+
+func WithMaxAge(maxAge int) Option {
+	return func(opt *option) {
+		opt.maxAge = maxAge
+	}
+}
+
+func WithMaxBackups(maxBackups int) Option {
+	return func(opt *option) {
+		opt.maxBackups = maxBackups
+	}
+}
+
 func NewLogger(opts ...Option) *zap.Logger {
 	opt := &option{
 		level:          DefaultLevel,

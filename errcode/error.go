@@ -12,16 +12,12 @@ import (
 	"net/http"
 )
 
-const (
-	UnknownMessage = ""
-)
-
 var _ error = (*Error)(nil)
 
 type Error struct {
-	Code int `json:"code"`
+	Code    int    `json:"code"`
 	Message string `json:"message"`
-	Status int `json:"status"` // httpStatus
+	Status  int    `json:"status"` // httpStatus
 }
 
 func (e *Error) Error() string {
@@ -29,10 +25,10 @@ func (e *Error) Error() string {
 }
 
 func New(code int, msg string, status ...int) error {
-	err :=  &Error{
+	err := &Error{
 		Code:    code,
 		Message: msg,
-		Status: http.StatusOK,
+		Status:  http.StatusOK,
 	}
 	if len(status) > 0 {
 		err.Status = status[0]

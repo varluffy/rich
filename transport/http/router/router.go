@@ -17,19 +17,21 @@ import (
 )
 
 func NewRouter(opts ...Option) *gin.Engine {
-	opt := &option{
-		logger:        log.NewLogger(),
-		enableCors:    true,
-		enableLogging: true,
-		enablePProf:   false,
-		panicNotify:   false,
+	opt := &options{
+		logger:              log.NewLogger(),
+		enableCors:          true,
+		enableLogging:       true,
+		enablePProf:         false,
+		panicNotify:         false,
 		withoutLoggingPaths: make(map[string]bool),
 	}
 	for _, f := range opts {
 		f(opt)
 	}
+
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
+	engine.Use(middleware.Recovery(opt.logger))
 
 	if opt.enableLogging {
 		engine.Use(middleware.Logging(opt.logger))
@@ -60,19 +62,19 @@ func NewRouter(opts ...Option) *gin.Engine {
 }
 
 func DisableLogging() Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		opt.enableLogging = false
 	}
 }
 
 func EnablePProf() Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		opt.enablePProf = true
 	}
 }
 
 func WithoutLoggingPaths(paths ...string) Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		m := make(map[string]bool)
 		for _, path := range paths {
 			m[path] = true
@@ -82,18 +84,18 @@ func WithoutLoggingPaths(paths ...string) Option {
 }
 
 func WithLogger(logger *zap.Logger) Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		opt.logger = logger
 	}
 }
 
-type Option func(opt *option)
+type Option func(opt *options)
 
-type option struct {
-	logger        *zap.Logger
-	enableCors    bool
-	enableLogging bool
-	enablePProf   bool
-	panicNotify   bool
+type options struct {
+	logger              *zap.Logger
+	enableCors          bool
+	enableLogging       bool
+	enablePProf         bool
+	panicNotify         bool
 	withoutLoggingPaths map[string]bool
 }

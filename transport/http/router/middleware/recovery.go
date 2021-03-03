@@ -1,7 +1,7 @@
 /**
  * @Time: 2021/2/25 4:32 下午
  * @Author: varluffy
- * @Description: //TODO
+ * @Description: gin recovery
  */
 
 package middleware

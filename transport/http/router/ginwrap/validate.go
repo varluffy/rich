@@ -19,7 +19,7 @@ import (
 var _ error = (*ValidateError)(nil)
 
 type ValidateError struct {
-	Key string
+	Key     string
 	Message string
 }
 
@@ -61,9 +61,10 @@ func BindAndValid(c *gin.Context, v interface{}) error {
 }
 
 func translateErrors(trans ut.Translator, errs validator.ValidationErrors) string {
-	errList := make([]string, len(errs))
+	errList := make([]string, 0)
 	for _, e := range errs {
-		errList = append(errList, e.Translate(trans))
+		msg := e.Translate(trans)
+		errList = append(errList, msg)
 	}
 	return strings.Join(errList, ",")
 }

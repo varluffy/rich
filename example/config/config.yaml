@@ -1,0 +1,24 @@
+HTTP:
+  Addr: :8080
+  TimeOut: 30 # 30s
+Log:
+  OutpufFile: ""
+  MaxSize: 1024
+  MaxBackup: 100
+  MaxAge: 30
+  Compress: false
+MySQL:
+  DSN: root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local
+  EnableLog: true
+  MaxLifetime: 7200
+  MaxOpenConns: 150
+  MaxIdleConns: 50
+  EnableAutoMigrate: true
+Redis:
+  Addr: 127.0.0.1:6379
+  Password: 123456
+  DB: 15
+Token:
+  Secret: 123456
+  Expire: 720 # hour
+

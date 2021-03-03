@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/varluffy/ginx/log"
+	"github.com/varluffy/ginx/transport"
 	"github.com/varluffy/ginx/transport/http/router"
 	"go.uber.org/zap"
 	"net"
@@ -32,6 +33,8 @@ type Server struct {
 	router   *gin.Engine
 	logger   *zap.Logger
 }
+
+var _ transport.Server = (*Server)(nil)
 
 type ServerOption func(server *Server)
 
