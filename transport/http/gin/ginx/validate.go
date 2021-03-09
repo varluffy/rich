@@ -1,10 +1,9 @@
 /**
  * @Time: 2021/2/26 2:41 下午
  * @Author: varluffy
- * @Description: validate
  */
 
-package ginwrap
+package ginx
 
 import (
 	"encoding/json"
@@ -12,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	"github.com/varluffy/ginx/errcode"
+	"github.com/varluffy/rich/errcode"
 	"strings"
 )
 

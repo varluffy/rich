@@ -1,13 +1,13 @@
 /**
  * @Time: 2021/2/27 7:03 下午
  * @Author: varluffy
- * @Description: token
  */
 
 package middleware
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/spf13/viper"
 	"time"
 )
 
@@ -26,8 +26,8 @@ type token struct {
 	expire time.Duration
 }
 
-func NewToken(secret string, expire time.Duration) Token {
-	return &token{secret: secret, expire: expire}
+func NewToken(conf *viper.Viper) Token {
+	return &token{secret: conf.GetString("jwt.secret"), expire: conf.GetDuration("jwt.expire")}
 }
 
 func (t *token) Sign(userId int64) (tokenString string, err error) {

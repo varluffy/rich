@@ -7,7 +7,7 @@
 package app
 
 import (
-	"github.com/varluffy/ginx/transport/http"
+	"github.com/varluffy/rich/transport/http"
 	"testing"
 	"time"
 )

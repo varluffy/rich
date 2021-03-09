@@ -1,7 +1,6 @@
 /**
  * @Time: 2021/2/24 11:02 上午
  * @Author: varluffy
- * @Description: server
  */
 
 package http
@@ -11,9 +10,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/varluffy/ginx/log"
-	"github.com/varluffy/ginx/transport"
-	"github.com/varluffy/ginx/transport/http/router"
+	"github.com/varluffy/rich/log"
+	"github.com/varluffy/rich/transport"
 	"go.uber.org/zap"
 	"net"
 	"net/http"
@@ -43,7 +41,7 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: DefaultTimeout,
-		router:  router.NewRouter(),
+		router:  gin.New(),
 		logger:  log.NewLogger(),
 	}
 	for _, opt := range opts {
@@ -110,4 +108,8 @@ func (s *Server) Stop() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 	return s.Shutdown(ctx)
+}
+
+func (s *Server) Router() *gin.Engine {
+	return s.router
 }

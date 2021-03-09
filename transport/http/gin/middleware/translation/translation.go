@@ -1,10 +1,9 @@
 /**
  * @Time: 2021/2/25 6:11 下午
  * @Author: varluffy
- * @Description: gin validate translate
  */
 
-package middleware
+package translation
 
 import (
 	"github.com/gin-gonic/gin"
@@ -20,6 +19,7 @@ import (
 	"strings"
 )
 
+// Translation 参数绑定翻译
 func Translation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uni := ut.New(en.New(), zh.New(), zh_Hant_TW.New())

@@ -1,7 +1,6 @@
 /**
  * @Time: 2021/2/24 8:46 下午
  * @Author: varluffy
- * @Description: //app
  */
 
 package app
@@ -9,8 +8,8 @@ package app
 import (
 	"context"
 	"errors"
-	"github.com/varluffy/ginx/log"
-	"github.com/varluffy/ginx/transport"
+	"github.com/varluffy/rich/log"
+	"github.com/varluffy/rich/transport"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"os"
@@ -19,14 +18,14 @@ import (
 )
 
 type App struct {
-	opt    option
+	opt    options
 	ctx    context.Context
 	cancel func()
 	logger *zap.Logger
 }
 
 func New(opts ...Option) *App {
-	opt := option{
+	opt := options{
 		ctx:     context.Background(),
 		sigs:    []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		logger:  log.NewLogger(),
@@ -90,9 +89,9 @@ func (a *App) Stop() error {
 	return nil
 }
 
-type Option func(opt *option)
+type Option func(opt *options)
 
-type option struct {
+type options struct {
 	name    string
 	version string
 
@@ -104,25 +103,25 @@ type option struct {
 }
 
 func Name(name string) Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		opt.name = name
 	}
 }
 
 func Version(version string) Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		opt.version = version
 	}
 }
 
 func Server(srv ...transport.Server) Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		opt.servers = srv
 	}
 }
 
 func Logger(logger *zap.Logger) Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		opt.logger = logger
 	}
 }

@@ -1,23 +1,42 @@
 /**
  * @Time: 2021/2/25 4:32 下午
  * @Author: varluffy
- * @Description: gin recovery
  */
 
-package middleware
+package recovery
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/varluffy/ginx/errcode"
-	"github.com/varluffy/ginx/log"
-	"github.com/varluffy/ginx/transport/http/router/ginwrap"
+	"github.com/varluffy/rich/errcode"
+	"github.com/varluffy/rich/log"
+	"github.com/varluffy/rich/transport/http/gin/ginx"
 	"go.uber.org/zap"
 	"net/http"
 	"net/http/httputil"
 	"runtime"
 )
 
-func Recovery(logger *zap.Logger) gin.HandlerFunc {
+type Option func(*options)
+
+type options struct {
+	logger *zap.Logger
+}
+
+func WithLogger(logger *zap.Logger) Option {
+	return func(o *options) {
+		o.logger = logger
+	}
+}
+
+func Recovery(opts ...Option) gin.HandlerFunc {
+	options := &options{
+		logger: log.NewLogger(),
+	}
+	for _, o := range opts {
+		o(options)
+	}
+	logger := options.logger
+	logger = logger.With(zap.String("module", "middleware/recovery"))
 	return func(c *gin.Context) {
 		defer func() {
 			ctx := c.Request.Context()
@@ -32,7 +51,7 @@ func Recovery(logger *zap.Logger) gin.HandlerFunc {
 					zap.Any("err", err),
 					zap.String("stack", string(buf)),
 				)
-				ginwrap.ErrorResponse(c, errcode.New(500, "inner error", http.StatusInternalServerError))
+				ginx.ErrorResponse(c, errcode.New(500, "inner error", http.StatusInternalServerError))
 				c.Abort()
 				return
 			}

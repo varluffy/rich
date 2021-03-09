@@ -2,6 +2,13 @@ APPNAME = application
 VERSION=$(shell git describe --tags --always)
 GOBIN=$(shell go env GOBIN)
 
+.PHONY: init
+init:
+	go get -u github.com/google/wire/cmd/wire
+
+.PHONY: wire
+wire:
+	cd cmd/application/ && wire .
 .PHONY: run
 run:
 	cd cmd/application/ && go run . -c ../../config/config.yaml

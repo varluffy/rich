@@ -1,13 +1,13 @@
 /**
- * @Time: 2021/3/1 1:27 下午
+ * @Time: 2021/3/8 4:16 下午
  * @Author: varluffy
- * @Description: //TODO
  */
 
-package domain
+package biz
 
 import (
 	"context"
+	"go.uber.org/zap"
 )
 
 const (
@@ -24,13 +24,23 @@ type Auth struct {
 	Credential   string
 }
 
+//IAuthRepository IAuthRepository
 type AuthRepo interface {
 	// db
 	GetAuth(ctx context.Context, identityType int64, identifier string) (auth *Auth, err error)
 	CreateAuth(ctx context.Context, auth *Auth) (err error)
 	UpdateAuth(ctx context.Context, id int64, aut *Auth) (err error)
+}
 
-	// redis
-	SetCode(ctx context.Context, mobile string, code string) (err error)
-	CheckCode(ctx context.Context, mobile string, code string) (err error)
+type AuthUsecase struct {
+	repo   AuthRepo
+	logger *zap.Logger
+}
+
+func NewAuthUsecase(repo AuthRepo, logger *zap.Logger) *AuthUsecase {
+	return &AuthUsecase{repo: repo, logger: logger}
+}
+
+func (a *AuthUsecase) GetAuth(ctx context.Context, identityType int64, identifier string) (auth *Auth, err error) {
+	return a.repo.GetAuth(ctx, identityType, identifier)
 }

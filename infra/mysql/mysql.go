@@ -1,10 +1,9 @@
 /**
  * @Time: 2021/2/26 6:05 下午
  * @Author: varluffy
- * @Description: //TODO
  */
 
-package repository
+package mysql
 
 import (
 	"go.uber.org/zap"
@@ -13,9 +12,9 @@ import (
 	"time"
 )
 
-type DBOption func(option *dbOption)
+type Option func(option *options)
 
-type dbOption struct {
+type options struct {
 	logger       *zap.Logger
 	maxLifeTime  time.Duration
 	maxIdleConns int
@@ -23,8 +22,8 @@ type dbOption struct {
 	enableLog    bool
 }
 
-func NewDB(dsn string, opts ...DBOption) (*gorm.DB, func(), error) {
-	opt := &dbOption{
+func New(dsn string, opts ...Option) (*gorm.DB, func(), error) {
+	opt := &options{
 		maxLifeTime:  time.Second * 7200,
 		maxIdleConns: 150,
 		maxOpenConns: 50,
@@ -55,20 +54,20 @@ func NewDB(dsn string, opts ...DBOption) (*gorm.DB, func(), error) {
 	return db, cleanFunc, nil
 }
 
-func WithDBMaxLifetime(duration time.Duration) DBOption {
-	return func(opt *dbOption) {
+func WithDBMaxLifetime(duration time.Duration) Option {
+	return func(opt *options) {
 		opt.maxLifeTime = duration
 	}
 }
 
-func WithDBMaxIdleConns(i int) DBOption {
-	return func(opt *dbOption) {
+func WithDBMaxIdleConns(i int) Option {
+	return func(opt *options) {
 		opt.maxIdleConns = i
 	}
 }
 
-func WithDBMaxOpenConns(o int) DBOption {
-	return func(opt *dbOption) {
+func WithDBMaxOpenConns(o int) Option {
+	return func(opt *options) {
 		opt.maxOpenConns = o
 	}
 }

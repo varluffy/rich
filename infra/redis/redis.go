@@ -1,17 +1,16 @@
 /**
  * @Time: 2021/2/27 6:30 下午
  * @Author: varluffy
- * @Description: redis client
  */
 
-package repository
+package redis
 
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
 )
 
-func NewRedis(addr, password string, db int) (*redis.Client, func(), error) {
+func New(addr, password string, db int) (*redis.Client, func(), error) {
 	opt := &redis.Options{
 		Addr: addr,
 		DB:   db,

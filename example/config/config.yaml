@@ -1,24 +1,26 @@
-HTTP:
-  Addr: :8080
-  TimeOut: 30 # 30s
-Log:
-  OutpufFile: ""
-  MaxSize: 1024
-  MaxBackup: 100
-  MaxAge: 30
-  Compress: false
-MySQL:
-  DSN: root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local
-  EnableLog: true
-  MaxLifetime: 7200
-  MaxOpenConns: 150
-  MaxIdleConns: 50
-  EnableAutoMigrate: true
-Redis:
-  Addr: 127.0.0.1:6379
-  Password: 123456
-  DB: 15
-Token:
-  Secret: 123456
-  Expire: 720 # hour
+http:
+  network: tcp
+  addr: :8080
+  timeout: 30 # 30s
+  mode: debug
+log:
+  out_put_file: ""
+  max_size: 1024
+  max_backup: 100
+  max_age: 30
+  compress: false
+mysql:
+  dsn: root:123456@tcp(127.0.0.1:3306)/youqiande?charset=utf8mb4&parseTime=True&loc=Local
+  enable_log: true
+  max_life_time: 7200
+  max_open_conns: 150
+  max_idle_conns: 50
+  auto_migrate: true
+redis:
+  addr: 127.0.0.1:6379
+  pass: 123456
+  db: 15
+jwt:
+  secret: 123456
+  expire: 720 # hour
 

@@ -17,18 +17,17 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/varluffy/ginx/app"
-	"github.com/varluffy/ginx/example/api/middleware"
-	v1 "github.com/varluffy/ginx/example/api/v1"
-	"github.com/varluffy/ginx/example/internal/repo"
-	"github.com/varluffy/ginx/example/internal/service"
-	"github.com/varluffy/ginx/example/internal/usecase"
-	"github.com/varluffy/ginx/log"
-	"github.com/varluffy/ginx/repository"
-	"github.com/varluffy/ginx/transport/http"
-	"github.com/varluffy/ginx/transport/http/router"
+	"github.com/varluffy/rich/app"
+	v1 "github.com/varluffy/rich/example/api/v1"
+	"github.com/varluffy/rich/log"
+	"github.com/varluffy/rich/transport/http"
+	"github.com/varluffy/rich/transport/http/gin/middleware/logging"
+	"github.com/varluffy/rich/transport/http/gin/middleware/recovery"
+	"github.com/varluffy/rich/transport/http/gin/middleware/translation"
+	"go.uber.org/zap"
 	"os"
 	"time"
 )
@@ -55,7 +54,22 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return initApp()
+		conf := viper.GetViper()
+		logger := log.NewLogger(
+			log.WithFileRotation(conf.GetString("log.out_put_file")),
+			log.WithMaxAge(conf.GetInt("log.max_age")),
+			log.WithMaxSize(conf.GetInt("log.max_size")),
+			log.WithMaxBackups(conf.GetInt("log.max_backup")),
+		)
+		logger.Info("init app")
+		app, clean, err := initApp(conf, logger)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			clean()
+		}()
+		return app.Run()
 	},
 }
 
@@ -94,57 +108,28 @@ func initConfig() {
 	panic("viper.ReadInConfig error:" + cfgFile + err.Error())
 }
 
-func initApp() error {
-	logger := log.NewLogger(
-		log.WithFileRotation(viper.GetString("log.OutpufFile")),
-		log.WithMaxAge(viper.GetInt("log.MaxAge")),
-		log.WithMaxSize(viper.GetInt("log.MaxSize")),
-		log.WithMaxBackups(viper.GetInt("log.Backups")),
+func newHttpServer(conf *viper.Viper, logger *zap.Logger) *http.Server {
+	router := gin.New()
+	gin.SetMode(conf.GetString("HTTP.Mode"))
+	router.Use(
+		recovery.Recovery(recovery.WithLogger(logger)),
+		translation.Translation(),
+		logging.Server(logging.WithLogger(logger)),
 	)
-	logger.Info("init app")
-	db, cleanDBFunc, err := repository.NewDB(
-		viper.GetString("MySQL.DSN"),
-		repository.WithDBMaxLifetime(viper.GetDuration("MySQL.MaxLifetime")*time.Second),
-		repository.WithDBMaxIdleConns(viper.GetInt("MySQL.MaxIdleConns")),
-		repository.WithDBMaxOpenConns(viper.GetInt("MySQL.MaxOpenConns")),
-	)
-	if err != nil {
-		return err
-	}
-	if viper.GetBool("MySQL.EnableAutoMigrate") {
-		// todo add migrate
-	}
-	rds, cleanRdsFunc, err := repository.NewRedis(
-		viper.GetString("Redis.Addr"),
-		viper.GetString("Redis.Password"),
-		viper.GetInt("Redis.DB"),
-	)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		cleanDBFunc()
-		cleanRdsFunc()
-	}()
-	engine := router.NewRouter(
-		router.WithLogger(logger),
-	)
-	httpServer := http.NewServer(
+	return http.NewServer(
 		http.Address(viper.GetString("HTTP.addr")),
 		http.Timeout(viper.GetDuration("HTTP.timeout")*time.Second),
 		http.Logger(logger),
-		http.Router(engine),
+		http.Router(router),
 	)
-	application := app.New(
+}
+
+func newApp(logger *zap.Logger, hs *http.Server, router *v1.Router) *app.App {
+	router.Register()
+	return app.New(
 		app.Name(Name),
 		app.Version(Version),
 		app.Logger(logger),
-		app.Server(httpServer),
+		app.Server(hs),
 	)
-	repo := repo.NewRepo(db, rds)
-	u := usecase.NewUsecase(repo, logger)
-	token := middleware.NewToken(viper.GetString("Token.Secret"), viper.GetDuration("Token.Expire"))
-	svc := service.NewService(logger, u, token)
-	v1.RegisterRouter(engine, svc, token)
-	return application.Run()
 }

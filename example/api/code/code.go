@@ -1,12 +1,11 @@
 /**
  * @Time: 2021/2/27 7:26 下午
  * @Author: varluffy
- * @Description: //TODO
  */
 
 package code
 
-import "github.com/varluffy/ginx/errcode"
+import "github.com/varluffy/rich/errcode"
 
 var (
 	ErrUnauthorizedInvalid = errcode.Unauthorized(401, "签名错误")

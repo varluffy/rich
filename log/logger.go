@@ -1,7 +1,6 @@
 /**
  * @Time: 2021/2/24 2:01 下午
  * @Author: varluffy
- * @Description: logger
  */
 
 package log

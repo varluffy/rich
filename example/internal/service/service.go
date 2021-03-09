@@ -1,23 +1,22 @@
 /**
- * @Time: 2021/3/2 11:16 上午
+ * @Time: 2021/3/8 4:29 下午
  * @Author: varluffy
- * @Description: service
  */
 
 package service
 
 import (
-	"github.com/varluffy/ginx/example/api/middleware"
-	"github.com/varluffy/ginx/example/internal/usecase"
-	"go.uber.org/zap"
+	"github.com/google/wire"
 )
 
+var ProviderSet = wire.NewSet(NewService, NewAuthService)
+
 type Service struct {
-	Auth *Auth
+	Auth *AuthService
 }
 
-func NewService(logger *zap.Logger, u *usecase.Usecase, token middleware.Token) *Service {
+func NewService(auth *AuthService) *Service {
 	return &Service{
-		Auth: NewAuth(logger, token, u.Auth),
+		Auth: auth,
 	}
 }

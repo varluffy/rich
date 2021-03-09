@@ -1,7 +1,6 @@
 /**
  * @Time: 2021/2/25 7:00 下午
  * @Author: varluffy
- * @Description: errcode
  */
 
 package errcode

@@ -1,15 +1,13 @@
 /**
  * @Time: 2021/2/24 6:25 下午
  * @Author: varluffy
- * @Description: server test
  */
 
 package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/varluffy/ginx/log"
-	router2 "github.com/varluffy/ginx/transport/http/router"
+	"github.com/varluffy/rich/log"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
@@ -26,7 +24,8 @@ func TestServer(t *testing.T) {
 		return
 	})
 	logger := log.NewLogger(log.WithConsoleEncoder())
-	router := router2.NewRouter(router2.WithLogger(logger))
+	srv := NewServer(Logger(logger))
+	router := srv.Router()
 	group := router.Group("/test")
 	{
 		group.GET("/", fn)
@@ -37,7 +36,7 @@ func TestServer(t *testing.T) {
 		group.PATCH("/products/:id", fn)
 		group.DELETE("/products/:id", fn)
 	}
-	srv := NewServer(Router(router), Logger(logger))
+
 	time.AfterFunc(time.Second, func() {
 		defer srv.Stop()
 		testClient(t, srv)

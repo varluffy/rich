@@ -1,7 +1,6 @@
 /**
- * @Time: 2021/2/27 7:19 下午
+ * @Time: 2021/3/4 2:41 下午
  * @Author: varluffy
- * @Description: auth
  */
 
 package middleware
@@ -9,8 +8,9 @@ package middleware
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/varluffy/ginx/example/api/code"
-	"github.com/varluffy/ginx/transport/http/router/ginwrap"
+	"github.com/google/wire"
+	"github.com/varluffy/rich/example/api/code"
+	"github.com/varluffy/rich/transport/http/gin/ginx"
 	"strings"
 )
 
@@ -18,19 +18,23 @@ const (
 	userIdKey = "auth-userId"
 )
 
-type AuthMiddleware struct {
+var ProviderSet = wire.NewSet(NewToken, NewMiddleware)
+
+type Middleware struct {
 	token Token
 }
 
-func NewAuth(token Token) *AuthMiddleware {
-	return &AuthMiddleware{token: token}
+func NewMiddleware(token Token) *Middleware {
+	return &Middleware{
+		token: token,
+	}
 }
 
-func (a *AuthMiddleware) Auth() gin.HandlerFunc {
+func (a *Middleware) Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
-			ginwrap.ErrorResponse(c, code.ErrUnauthorizedInvalid)
+			ginx.ErrorResponse(c, code.ErrUnauthorizedInvalid)
 			return
 		}
 		tokenString = tokenString[7:]
@@ -38,15 +42,15 @@ func (a *AuthMiddleware) Auth() gin.HandlerFunc {
 		if err != nil {
 			switch err.(jwt.ValidationError).Errors {
 			case jwt.ValidationErrorExpired:
-				ginwrap.Response(c, code.ErrUnauthorizedExpired)
+				ginx.Response(c, code.ErrUnauthorizedExpired)
 				return
 			default:
-				ginwrap.ErrorResponse(c, code.ErrUnauthorizedError)
+				ginx.ErrorResponse(c, code.ErrUnauthorizedError)
 				return
 			}
 		}
-		if claim.UserId < 0 {
-			ginwrap.ErrorResponse(c, code.ErrUnauthorizedInvalid)
+		if claim.UserId <= 0 {
+			ginx.ErrorResponse(c, code.ErrUnauthorizedInvalid)
 			return
 		}
 		c.Set(userIdKey, claim.UserId)
