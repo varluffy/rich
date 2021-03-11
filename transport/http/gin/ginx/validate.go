@@ -60,13 +60,13 @@ func warpError(c *gin.Context, err error) error {
 		trans := c.Value("trans")
 		utrans, _ := trans.(ut.Translator)
 		errs := err.(validator.ValidationErrors)
-		return errcode.BadRequest(400, translateErrors(utrans, errs))
+		return errcode.New(400, translateErrors(utrans, errs))
 	case *json.UnmarshalTypeError:
 		unmarshalTypeError := err.(*json.UnmarshalTypeError)
 		message := fmt.Errorf("%s 类型错误，期望类型 %s", unmarshalTypeError.Field, unmarshalTypeError.Type.String()).Error()
-		return errcode.BadRequest(400, message)
+		return errcode.New(400, message)
 	default:
-		return errcode.InternalServer(500, "unknown, invalid params")
+		return errcode.New(400, "参数解析失败，未知类型")
 	}
 }
 
