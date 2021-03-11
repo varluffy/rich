@@ -38,7 +38,7 @@ type LoginRequest struct {
 
 func (s *AuthService) Login(c *gin.Context) {
 	var req LoginRequest
-	if err := ginx.BindAndValid(c, &req); err != nil {
+	if err := ginx.ShouldBind(c, &req); err != nil {
 		ginx.ErrorResponse(c, err)
 		return
 	}
