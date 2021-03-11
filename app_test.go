@@ -4,7 +4,7 @@
  * @Description: //TODO
  */
 
-package app
+package rich
 
 import (
 	"github.com/varluffy/rich/transport/http"

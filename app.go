@@ -3,7 +3,7 @@
  * @Author: varluffy
  */
 
-package app
+package rich
 
 import (
 	"context"
