@@ -1,11 +1,14 @@
-APPNAME = application
+APPNAME = example
 VERSION=$(shell git describe --tags --always)
 GOBIN=$(shell go env GOBIN)
 
 .PHONY: init
 init:
-	go get -u github.com/google/wire/cmd/wire
-
+	go get github.com/google/wire/cmd/wire
+	go install https://github.com/varluffy/protoc-gen-go-gin@latest
+	go get github.com/golang/protobuf/{proto,protoc-gen-go}
+	go get github.com/favadi/protoc-go-inject-tag
+	go get github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 .PHONY: wire
 wire:
 	cd cmd/server/ && wire .
