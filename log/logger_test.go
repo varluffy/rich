@@ -5,12 +5,21 @@
 
 package log
 
-import "testing"
+import (
+	"context"
+	"go.uber.org/zap"
+	"testing"
+)
 
 func TestNewJSONLogger(t *testing.T) {
-	logger := NewLogger(WithDebugLevel(), WithFileRotation("/Users/leng/code/go-api/1111.log"), WithConsoleEncoder(), WithDisableConsole())
+	ctx := context.Background()
+	ctx = NewTraceIDContext(ctx, "123123123")
+	logger := NewLogger(WithDebugLevel(), WithConsoleEncoder())
 	defer logger.Sync()
+	logger = NewTraceLogger(ctx, logger)
 	logger.Debug("debug logger")
 	logger.Info("info logger")
 	logger.Error("error logger")
+	logger = logger.With(zap.String("with", "32q4324"))
+	logger.Info("with test")
 }

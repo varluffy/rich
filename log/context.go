@@ -8,6 +8,7 @@ package log
 import (
 	"context"
 	uuid "github.com/satori/go.uuid"
+	"go.uber.org/zap"
 )
 
 type (
@@ -28,4 +29,9 @@ func FromTraceIDContext(ctx context.Context) string {
 		}
 	}
 	return uuid.NewV4().String()
+}
+
+func NewTraceLogger(ctx context.Context, logger *zap.Logger) *zap.Logger {
+	traceId := FromTraceIDContext(ctx)
+	return logger.With(zap.String("trace_id", traceId))
 }
