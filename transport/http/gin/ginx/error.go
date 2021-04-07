@@ -21,15 +21,13 @@ func Response(c *gin.Context, data interface{}) {
 
 func ErrorResponse(c *gin.Context, err error, data ...interface{}) {
 	var d interface{}
+	d = gin.H{}
 	if len(data) > 0 {
-		d = data[0]
-	}
-	if d == nil {
-		d = gin.H{}
+		d = data
 	}
 	_ = c.Error(err)
 	if e := new(errcode.Error); errors.As(err, &e) {
-		c.JSON(e.Status, gin.H{"code": e.Code, "message": e.Message, "data": data})
+		c.JSON(e.Status, gin.H{"code": e.Code, "message": e.Message, "data": d})
 		c.Abort()
 		return
 	}
