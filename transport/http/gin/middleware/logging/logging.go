@@ -7,6 +7,7 @@ package logging
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
@@ -21,6 +22,7 @@ type Option func(*options)
 type options struct {
 	logger   *zap.Logger
 	skipPath []string
+	disableLogSize int
 }
 
 func WithLogger(logger *zap.Logger) Option {
@@ -35,6 +37,11 @@ func WithSkipPath(paths []string) Option {
 	}
 }
 
+func DisableLogSize(size int) Option {
+	return func(o *options) {
+		o.disableLogSize = size
+	}
+}
 type AccessLogWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
@@ -51,6 +58,7 @@ func Server(opts ...Option) gin.HandlerFunc {
 	options := &options{
 		logger:   log.NewLogger(),
 		skipPath: []string{},
+		disableLogSize: 1000,
 	}
 	for _, opt := range opts {
 		opt(options)
@@ -72,7 +80,7 @@ func Server(opts ...Option) gin.HandlerFunc {
 		path := c.Request.URL.Path
 		method := c.Request.Method
 		body, _ := c.GetRawData()
-		msg := fmt.Sprintf("[HTTP] %s-%s-%s-%d (%dms)", path, method, c.ClientIP(), c.Writer.Status(), time.Since(start)/1e6)
+		msg := fmt.Sprintf("[HTTP] %s-%s-%d (%dms)", path, method, c.Writer.Status(), time.Since(start)/1e6)
 		fields := []zap.Field{
 			zap.String("trace_id", traceId),
 			zap.String("method", c.Request.Method),
@@ -91,12 +99,16 @@ func Server(opts ...Option) gin.HandlerFunc {
 				skip[path] = struct{}{}
 			}
 		}
-
 		// 当有skip path 或者 response body 过大时 log 中不记录 response
-		if _, ok := skip[path]; ok || c.Writer.Size() >= 500 {
-			fields = append(fields, zap.String("response", bodyWriter.body.String()))
+		if _, ok := skip[path]; ! ok &&  c.Writer.Size() <= options.disableLogSize {
+			var resp gin.H
+			err := json.Unmarshal(bodyWriter.body.Bytes(), &resp)
+			if err != nil {
+				fields = append(fields, zap.String("response", bodyWriter.body.String()))
+			} else {
+				fields = append(fields, zap.Any("response", resp))
+			}
 		}
-
 		switch {
 		case c.Writer.Status() >= http.StatusBadRequest && c.Writer.Status() < http.StatusInternalServerError:
 			logger.Warn(msg, fields...)
