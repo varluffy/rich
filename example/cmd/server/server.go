@@ -17,6 +17,7 @@ import (
 	"github.com/varluffy/rich/example/internal/server/service"
 	"github.com/varluffy/rich/log"
 	"github.com/varluffy/rich/transport/http"
+	"github.com/varluffy/rich/transport/http/gin/ginx"
 	"github.com/varluffy/rich/transport/http/gin/middleware/logging"
 	"github.com/varluffy/rich/transport/http/gin/middleware/recovery"
 	"github.com/varluffy/rich/transport/http/gin/middleware/translation"
@@ -142,7 +143,10 @@ func initRedis(conf *viper.Viper, logger *zap.Logger) (*redis.Client, func(), er
 	}, nil
 }
 
-func initHttpServer(conf *viper.Viper, logger *zap.Logger, svc *services) *http.Server {
+func initHttpServer(conf *viper.Viper, logger *zap.Logger, svc *services) (*http.Server, error) {
+	if err := ginx.TransInit("zh"); err != nil {
+		return nil, err
+	}
 	gin.SetMode(conf.GetString("http.mode"))
 	e := gin.New()
 	e.Use(
@@ -157,7 +161,7 @@ func initHttpServer(conf *viper.Viper, logger *zap.Logger, svc *services) *http.
 		http.Logger(logger),
 		http.Router(e),
 	)
-	return hs
+	return hs, nil
 }
 
 func initApp(logger *zap.Logger, hs *http.Server) *rich.App {

@@ -49,7 +49,7 @@ func (s *BlogService) GetArticles_0(ctx *gin.Context) {
 	for k, v := range ctx.Request.Header {
 		md.Set(k, v...)
 	}
-	newCtx := metadata.NewIncomingContext(ctx, md)
+	newCtx := metadata.NewIncomingContext(ctx.Request.Context(), md)
 	out, err := s.server.(BlogServiceHTTPServer).GetArticles(newCtx, &in)
 	if err != nil {
 		ginx.ErrorResponse(ctx, err)
@@ -70,7 +70,7 @@ func (s *BlogService) GetArticles_1(ctx *gin.Context) {
 	for k, v := range ctx.Request.Header {
 		md.Set(k, v...)
 	}
-	newCtx := metadata.NewIncomingContext(ctx, md)
+	newCtx := metadata.NewIncomingContext(ctx.Request.Context(), md)
 	out, err := s.server.(BlogServiceHTTPServer).GetArticles(newCtx, &in)
 	if err != nil {
 		ginx.ErrorResponse(ctx, err)
@@ -96,7 +96,7 @@ func (s *BlogService) CreateArticle_0(ctx *gin.Context) {
 	for k, v := range ctx.Request.Header {
 		md.Set(k, v...)
 	}
-	newCtx := metadata.NewIncomingContext(ctx, md)
+	newCtx := metadata.NewIncomingContext(ctx.Request.Context(), md)
 	out, err := s.server.(BlogServiceHTTPServer).CreateArticle(newCtx, &in)
 	if err != nil {
 		ginx.ErrorResponse(ctx, err)

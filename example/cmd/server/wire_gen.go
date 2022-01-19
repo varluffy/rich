@@ -27,7 +27,11 @@ func newApp(conf *viper.Viper) (*rich.App, func(), error) {
 	mainServices := &services{
 		article: article,
 	}
-	server := initHttpServer(conf, logger, mainServices)
+	server, err := initHttpServer(conf, logger, mainServices)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	app := initApp(logger, server)
 	return app, func() {
 		cleanup()
