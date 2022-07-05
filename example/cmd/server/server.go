@@ -16,6 +16,7 @@ import (
 	v1 "github.com/varluffy/rich/example/api/app/v1"
 	"github.com/varluffy/rich/example/internal/server/service"
 	"github.com/varluffy/rich/log"
+	"github.com/varluffy/rich/transport/grpc"
 	"github.com/varluffy/rich/transport/http"
 	"github.com/varluffy/rich/transport/http/gin/ginx"
 	"github.com/varluffy/rich/transport/http/gin/middleware/logging"
@@ -67,7 +68,7 @@ func newConfig() (v *viper.Viper, err error) {
 	return
 }
 
-var set = wire.NewSet(initLogger, initHttpServer, initApp, initMysql, initRedis, wire.Struct(new(services), "*"))
+var set = wire.NewSet(initLogger, initHttpServer, initApp, initMysql, initRedis, initGrpcServer, wire.Struct(new(services), "*"))
 
 func initLogger(conf *viper.Viper) *zap.Logger {
 	logger := log.NewLogger(
@@ -143,6 +144,15 @@ func initRedis(conf *viper.Viper, logger *zap.Logger) (*redis.Client, func(), er
 	}, nil
 }
 
+func initGrpcServer(conf *viper.Viper, logger *zap.Logger, svc *services) (*grpc.Server, error) {
+	gs := grpc.NewServer(
+		grpc.Address(conf.GetString("grpc.addr")),
+	)
+	logger.Info("init grpc server ...", zap.String("addr", conf.GetString("grpc.addr")))
+	v1.RegisterBlogServiceServer(gs, svc.article)
+	return gs, nil
+}
+
 func initHttpServer(conf *viper.Viper, logger *zap.Logger, svc *services) (*http.Server, error) {
 	if err := ginx.TransInit("zh"); err != nil {
 		return nil, err
@@ -164,12 +174,12 @@ func initHttpServer(conf *viper.Viper, logger *zap.Logger, svc *services) (*http
 	return hs, nil
 }
 
-func initApp(logger *zap.Logger, hs *http.Server) *rich.App {
+func initApp(logger *zap.Logger, hs *http.Server, gs *grpc.Server) *rich.App {
 	return rich.New(
 		rich.Name(Name),
 		rich.Version(Version),
 		rich.Logger(logger),
-		rich.Server(hs),
+		rich.Server(hs, gs),
 	)
 }
 

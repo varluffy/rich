@@ -3,6 +3,9 @@ http:
   addr: :8080
   timeout: 30 # 30s
   mode: debug
+grpc:
+  addr: :50051
+  timeout: 30 # 30s
 log:
   out_put_file: ""
   max_size: 1024

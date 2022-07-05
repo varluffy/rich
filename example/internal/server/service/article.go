@@ -15,6 +15,7 @@ var _ v1.BlogServiceHTTPServer = &Article{}
 
 type Article struct {
 	usecase *domain.ArticleUseCase
+	v1.UnimplementedBlogServiceServer
 }
 
 func NewArticleService(usecase *domain.ArticleUseCase) *Article {
@@ -33,5 +34,5 @@ func (a *Article) GetArticles(ctx context.Context, req *v1.GetArticlesReq) (*v1.
 	return &v1.GetArticlesResp{
 		Total:    1,
 		Articles: nil,
-	},nil
+	}, nil
 }

@@ -20,8 +20,8 @@ import (
 type Option func(*options)
 
 type options struct {
-	logger   *zap.Logger
-	skipPath []string
+	logger         *zap.Logger
+	skipPath       []string
 	disableLogSize int
 }
 
@@ -42,6 +42,7 @@ func DisableLogSize(size int) Option {
 		o.disableLogSize = size
 	}
 }
+
 type AccessLogWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
@@ -56,8 +57,8 @@ func (w AccessLogWriter) Write(p []byte) (int, error) {
 
 func Server(opts ...Option) gin.HandlerFunc {
 	options := &options{
-		logger:   log.NewLogger(),
-		skipPath: []string{},
+		logger:         log.NewLogger(),
+		skipPath:       []string{},
 		disableLogSize: 1000,
 	}
 	for _, opt := range opts {
@@ -66,6 +67,10 @@ func Server(opts ...Option) gin.HandlerFunc {
 	logger := options.logger.WithOptions(zap.WithCaller(false))
 	logger = logger.With(zap.String("module", "middleware/logging"))
 	return func(c *gin.Context) {
+		if c.Writer.Status() == http.StatusNoContent {
+			c.Next()
+			return
+		}
 		bodyWriter := &AccessLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
 		c.Writer = bodyWriter
 		traceId := c.GetHeader("X-Request-Id")
@@ -100,7 +105,7 @@ func Server(opts ...Option) gin.HandlerFunc {
 			}
 		}
 		// 当有skip path 或者 response body 过大时 log 中不记录 response
-		if _, ok := skip[path]; ! ok &&  c.Writer.Size() <= options.disableLogSize {
+		if _, ok := skip[path]; !ok && c.Writer.Size() <= options.disableLogSize {
 			var resp gin.H
 			err := json.Unmarshal(bodyWriter.body.Bytes(), &resp)
 			if err != nil {

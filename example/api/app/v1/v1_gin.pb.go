@@ -5,14 +5,14 @@ package v1
 import (
 	context "context"
 	gin "github.com/gin-gonic/gin"
-	ginx "github.com/varluffy/rich/transport/http/gin/ginx"
+	"github.com/varluffy/rich/transport/http/gin/ginx"
 	metadata "google.golang.org/grpc/metadata"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the varluffy/protoc-gen-go-gin package it is being compiled against.
 // context.metadata.
-// gin.ginx.
+// gin.gin1.
 
 type BlogServiceHTTPServer interface {
 	CreateArticle(context.Context, *Article) (*Article, error)
